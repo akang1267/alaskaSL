@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALAsKA Sign Language – Alphabet Quiz</title>
+    <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        :root {
+          --bg: #0f172a;
+          --panel: rgba(15, 23, 42, 0.72);
+          --panel-border: rgba(148, 163, 184, 0.16);
+          --text: #e5eefc;
+          --muted: #b2bfd6;
+          --accent: #7c3aed;
+          --chip: rgba(124, 58, 237, 0.15);
+          --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+          --correct: rgba(34, 197, 94, 0.15);
+          --correct-border: rgba(34, 197, 94, 0.35);
+          --correct-text: #b7f7c9;
+          --wrong: rgba(239, 68, 68, 0.15);
+          --wrong-border: rgba(239, 68, 68, 0.35);
+          --wrong-text: #fecaca;
+        }
+
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at top left, rgba(124, 58, 237, 0.28), transparent 28%),
+            linear-gradient(180deg, #020617 0%, #0f172a 100%);
+          color: var(--text);
+          min-height: 100vh;
+        }
+
+        .page {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 32px 20px 48px;
+        }
+
+        /* ── HERO ── */
+        .hero {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 24px;
+          margin-bottom: 24px;
+        }
+
+        .eyebrow {
+          margin: 0 0 8px;
+          color: #a78bfa;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        h1 { margin: 0; font-size: 42px; }
+
+        .subtitle {
+          max-width: 700px;
+          color: var(--muted);
+          line-height: 1.5;
+          margin-top: 10px;
+        }
+
+        .status-pill {
+          padding: 10px 14px;
+          border-radius: 999px;
+          background: rgba(124, 58, 237, 0.18);
+          color: #d9cbff;
+          border: 1px solid rgba(124, 58, 237, 0.32);
+          font-size: 14px;
+          white-space: nowrap;
+        }
+
+        /* ── NAV ── */
+        .nav-bar {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 24px;
+          flex-wrap: wrap;
+        }
+
+        .nav-link {
+          padding: 9px 18px;
+          border-radius: 14px;
+          font: inherit;
+          font-size: 14px;
+          cursor: pointer;
+          text-decoration: none;
+          border: 1px solid rgba(148, 163, 184, 0.22);
+          color: var(--muted);
+          background: transparent;
+          transition: background 0.18s, color 0.18s;
+        }
+
+        .nav-link:hover { background: rgba(148, 163, 184, 0.1); }
+
+        .nav-link.active {
+          background: linear-gradient(135deg, var(--accent), #4f46e5);
+          color: white;
+          border-color: transparent;
+          font-weight: bold;
+        }
+
+        /* ── GRID ── */
+        .grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+        }
+
+        .panel {
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 22px;
+          padding: 24px;
+          box-shadow: var(--shadow);
+        }
+
+        h2 { margin-top: 0; font-size: 22px; }
+
+        /* ── IMAGE CARD ── */
+        .image-card {
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          border-radius: 18px;
+          background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+          border: 1px solid rgba(148, 163, 184, 0.12);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .image-card img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 18px;
+          transition: opacity 0.3s ease;
+        }
+
+        .image-card .img-placeholder {
+          color: var(--muted);
+          font-size: 16px;
+          text-align: center;
+          padding: 20px;
+          line-height: 1.5;
+        }
+
+        .image-label {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          background: rgba(124, 58, 237, 0.25);
+          border: 1px solid rgba(124, 58, 237, 0.35);
+          color: #d9cbff;
+          font-size: 12px;
+          padding: 4px 10px;
+          border-radius: 999px;
+        }
+
+        /* ── SCORE BAR ── */
+        .score-row {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 18px;
+          flex-wrap: wrap;
+        }
+
+        .score-badge {
+          flex: 1;
+          min-width: 80px;
+          border-radius: 14px;
+          padding: 12px 16px;
+          text-align: center;
+          border: 1px solid var(--panel-border);
+          background: rgba(15, 23, 42, 0.5);
+        }
+
+        .score-badge .val {
+          font-size: 26px;
+          font-weight: bold;
+          line-height: 1;
+        }
+
+        .score-badge .lbl {
+          font-size: 11px;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-top: 4px;
+        }
+
+        .score-badge.correct .val { color: #86efac; }
+        .score-badge.wrong   .val { color: #fca5a5; }
+        .score-badge.total   .val { color: #a78bfa; }
+
+        /* ── PROGRESS ── */
+        .progress-track {
+          height: 6px;
+          border-radius: 999px;
+          background: rgba(148, 163, 184, 0.14);
+          margin-bottom: 18px;
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--accent), #4f46e5);
+          transition: width 0.4s ease;
+          width: 0%;
+        }
+
+        /* ── INPUT AREA ── */
+        .input-row {
+          display: flex;
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .letter-input {
+          flex: 1;
+          border-radius: 14px;
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          padding: 14px 16px;
+          font: inherit;
+          font-size: 22px;
+          font-weight: bold;
+          color: var(--text);
+          background: rgba(15, 23, 42, 0.7);
+          outline: none;
+          text-transform: uppercase;
+          text-align: center;
+          letter-spacing: 0.15em;
+          transition: border-color 0.2s;
+        }
+
+        .letter-input:focus {
+          border-color: rgba(124, 58, 237, 0.75);
+        }
+
+        .letter-input.correct-input {
+          border-color: rgba(34, 197, 94, 0.6);
+          background: rgba(34, 197, 94, 0.07);
+        }
+
+        .letter-input.wrong-input {
+          border-color: rgba(239, 68, 68, 0.6);
+          background: rgba(239, 68, 68, 0.07);
+        }
+
+        /* ── BUTTONS ── */
+        button {
+          border: 0;
+          cursor: pointer;
+          font: inherit;
+          border-radius: 14px;
+          padding: 11px 15px;
+          transition: opacity 0.15s, transform 0.1s;
+        }
+
+        button:active { transform: scale(0.97); }
+
+        .primary {
+          background: linear-gradient(135deg, var(--accent), #4f46e5);
+          color: white;
+          font-weight: bold;
+          padding: 14px 24px;
+        }
+
+        .secondary {
+          background: rgba(148, 163, 184, 0.14);
+          color: var(--text);
+        }
+
+        .ghost {
+          background: transparent;
+          border: 1px solid rgba(148, 163, 184, 0.22);
+          color: var(--muted);
+        }
+
+        /* ── FEEDBACK BANNER ── */
+        .feedback {
+          border-radius: 16px;
+          padding: 18px 20px;
+          margin-top: 16px;
+          display: none;
+          align-items: flex-start;
+          gap: 14px;
+          font-size: 15px;
+          line-height: 1.5;
+        }
+
+        .feedback.show { display: flex; }
+
+        .feedback.correct {
+          background: var(--correct);
+          border: 1px solid var(--correct-border);
+          color: var(--correct-text);
+        }
+
+        .feedback.wrong {
+          background: var(--wrong);
+          border: 1px solid var(--wrong-border);
+          color: var(--wrong-text);
+        }
+
+        .feedback-icon { font-size: 22px; flex-shrink: 0; }
+
+        .feedback-body strong { display: block; font-size: 16px; margin-bottom: 4px; }
+
+        /* ── KEYBOARD ── */
+        .keyboard-label {
+          color: var(--muted);
+          font-size: 13px;
+          margin: 18px 0 10px;
+        }
+
+        .keyboard {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .key {
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          background: rgba(30, 41, 59, 0.6);
+          color: var(--text);
+          font-size: 14px;
+          font-weight: bold;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.15s, border-color 0.15s;
+          padding: 0;
+        }
+
+        .key:hover {
+          background: rgba(124, 58, 237, 0.2);
+          border-color: rgba(124, 58, 237, 0.4);
+        }
+
+        .key.used-correct {
+          background: rgba(34, 197, 94, 0.15);
+          border-color: rgba(34, 197, 94, 0.4);
+          color: #86efac;
+          cursor: default;
+        }
+
+        .key.used-wrong {
+          background: rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.25);
+          color: #fca5a5;
+          cursor: default;
+        }
+
+        /* ── NEXT BUTTON ── */
+        .next-row {
+          margin-top: 14px;
+          display: none;
+        }
+
+        .next-row.show { display: flex; gap: 10px; }
+
+        /* ── HISTORY ── */
+        .history-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          max-height: 320px;
+          overflow-y: auto;
+          padding-right: 4px;
+        }
+
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-track { background: transparent; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 4px; }
+
+        .history-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 14px;
+          border-radius: 12px;
+          border: 1px solid var(--panel-border);
+          background: rgba(15, 23, 42, 0.4);
+          font-size: 14px;
+        }
+
+        .history-item .h-letter {
+          font-size: 20px;
+          font-weight: bold;
+          width: 32px;
+          text-align: center;
+        }
+
+        .history-item .h-answer { color: var(--muted); flex: 1; }
+        .history-item .h-result { font-size: 16px; }
+
+        .history-item.h-correct { border-color: rgba(34,197,94,0.25); }
+        .history-item.h-wrong   { border-color: rgba(239,68,68,0.25); }
+
+        .empty-history {
+          color: var(--muted);
+          font-size: 14px;
+          text-align: center;
+          padding: 32px 0;
+        }
+
+        /* ── FINISH SCREEN ── */
+        .finish-screen {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 40px 20px;
+          gap: 16px;
+        }
+
+        .finish-screen.show { display: flex; }
+
+        .finish-icon { font-size: 56px; }
+        .finish-screen h3 { margin: 0; font-size: 26px; }
+        .finish-screen p { margin: 0; color: var(--muted); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+          .grid { grid-template-columns: 1fr; }
+          .hero { flex-direction: column; }
+          h1 { font-size: 34px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- HEADER -->
+    <header class="hero">
+        <div>
+            <p class="eyebrow">Version 1 Prototype</p>
+            <h1>ALAsKA Sign Language</h1>
+            <p class="subtitle">
+                Practice recognizing ASL hand-shapes. A random letter will appear — type what you think it is!
+            </p>
+        </div>
+        <div class="status-pill">Alphabet Quiz</div>
+    </header>
+
+    <!-- NAV -->
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-link">Translator</a>
+        <a href="#" class="nav-link active">Alphabet Quiz</a>
+    </nav>
+
+    <!-- SCORE BAR -->
+    <div class="score-row">
+        <div class="score-badge correct">
+            <div class="val" id="scoreCorrect">0</div>
+            <div class="lbl">Correct</div>
+        </div>
+        <div class="score-badge wrong">
+            <div class="val" id="scoreWrong">0</div>
+            <div class="lbl">Wrong</div>
+        </div>
+        <div class="score-badge total">
+            <div class="val" id="scoreTotal">0</div>
+            <div class="lbl">Attempted</div>
+        </div>
+        <div class="score-badge total" style="min-width:120px;">
+            <div class="val" id="scoreAccuracy">–</div>
+            <div class="lbl">Accuracy</div>
+        </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <main class="grid">
+
+        <!-- LEFT: IMAGE + ANSWER -->
+        <section class="panel">
+            <h2>What letter is this?</h2>
+
+            <div class="image-card" id="imageCard">
+                <div class="img-placeholder" id="imgPlaceholder">
+                    Press <strong>Start Quiz</strong> to begin.<br>
+                    A random ASL hand-shape will appear here.
+                </div>
+                <img id="aslImage" src="" alt="ASL letter" style="display:none;" />
+                <span class="image-label" id="imgLabel" style="display:none;">ASL Alphabet</span>
+            </div>
+
+            <div class="input-row" id="inputRow" style="display:none;">
+                <input
+                    type="text"
+                    class="letter-input"
+                    id="letterInput"
+                    maxlength="1"
+                    placeholder="?"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                />
+                <button class="primary" id="submitBtn">Submit</button>
+            </div>
+
+            <div class="feedback" id="feedbackBox">
+                <span class="feedback-icon" id="feedbackIcon"></span>
+                <div class="feedback-body">
+                    <strong id="feedbackTitle"></strong>
+                    <span id="feedbackMsg"></span>
+                </div>
+            </div>
+
+            <div class="next-row" id="nextRow">
+                <button class="primary" id="nextBtn">Next Letter →</button>
+                <button class="ghost" id="skipBtn">Skip</button>
+            </div>
+
+            <div style="margin-top:18px; display:flex; gap:10px;" id="startRow">
+                <button class="primary" id="startBtn">Start Quiz</button>
+            </div>
+        </section>
+
+        <!-- RIGHT: KEYBOARD + HISTORY -->
+        <section class="panel">
+            <h2>Round History</h2>
+
+            <p class="keyboard-label">Quick-tap a letter:</p>
+            <div class="keyboard" id="keyboard"></div>
+
+            <div style="margin-top:24px; margin-bottom:12px; font-size:13px; color:var(--muted);">
+                Previous answers
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-history">No answers yet. Start the quiz!</div>
+            </div>
+
+            <!-- FINISH SCREEN inside this panel -->
+            <div class="finish-screen" id="finishScreen">
+                <div class="finish-icon"></div>
+                <h3>Quiz Complete!</h3>
+                <p id="finishMsg"></p>
+                <button class="primary" id="restartBtn" style="margin-top:8px;">Play Again</button>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+    // ── CONFIG ──────────────────────────────────────────────────────────
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const IMAGE_PATH = 'asl_alphabet_test/'; // folder with A_test.jpg … Z_test.jpg
+    const TOTAL_ROUNDS = 26; // go through every letter once per quiz
+
+    // ── STATE ────────────────────────────────────────────────────────────
+    let queue = [];          // shuffled letters for this quiz
+    let currentLetter = '';  // letter shown right now
+    let answered = false;    // whether user has answered current round
+    let stats = { correct: 0, wrong: 0, total: 0 };
+    let history = [];        // { letter, guess, correct }
+    let quizRunning = false;
+
+    // ── ELEMENTS ─────────────────────────────────────────────────────────
+    const aslImage     = document.getElementById('aslImage');
+    const imgPlaceholder = document.getElementById('imgPlaceholder');
+    const imgLabel     = document.getElementById('imgLabel');
+    const letterInput  = document.getElementById('letterInput');
+    const submitBtn    = document.getElementById('submitBtn');
+    const nextBtn      = document.getElementById('nextBtn');
+    const skipBtn      = document.getElementById('skipBtn');
+    const startBtn     = document.getElementById('startBtn');
+    const startRow     = document.getElementById('startRow');
+    const inputRow     = document.getElementById('inputRow');
+    const nextRow      = document.getElementById('nextRow');
+    const feedbackBox  = document.getElementById('feedbackBox');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMsg  = document.getElementById('feedbackMsg');
+    const historyList  = document.getElementById('historyList');
+    const finishScreen = document.getElementById('finishScreen');
+    const finishMsg    = document.getElementById('finishMsg');
+    const restartBtn   = document.getElementById('restartBtn');
+    const progressFill = document.getElementById('progressFill');
+    const keyboard     = document.getElementById('keyboard');
+
+    // ── BUILD KEYBOARD ────────────────────────────────────────────────────
+    function buildKeyboard() {
+        keyboard.innerHTML = '';
+        LETTERS.forEach(l => {
+            const btn = document.createElement('button');
+            btn.className = 'key';
+            btn.textContent = l;
+            btn.dataset.letter = l;
+            btn.addEventListener('click', () => {
+                if (!quizRunning || answered) return;
+                letterInput.value = l;
+                letterInput.focus();
+            });
+            keyboard.appendChild(btn);
+        });
+    }
+
+    function markKey(letter, isCorrect) {
+        const btn = keyboard.querySelector(`[data-letter="${letter}"]`);
+        if (btn) {
+            btn.classList.remove('used-correct', 'used-wrong');
+            btn.classList.add(isCorrect ? 'used-correct' : 'used-wrong');
+        }
+    }
+
+    function resetKeys() {
+        keyboard.querySelectorAll('.key').forEach(k => {
+            k.classList.remove('used-correct', 'used-wrong');
+        });
+    }
+
+    // ── SHUFFLE ───────────────────────────────────────────────────────────
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ── QUIZ FLOW ─────────────────────────────────────────────────────────
+    function startQuiz() {
+        quizRunning = true;
+        stats = { correct: 0, wrong: 0, total: 0 };
+        history = [];
+        queue = shuffle(LETTERS);
+        answered = false;
+
+        updateScoreboard();
+        resetKeys();
+        renderHistory();
+        finishScreen.classList.remove('show');
+        startRow.style.display = 'none';
+        inputRow.style.display = 'flex';
+
+        loadNextLetter();
+    }
+
+    function loadNextLetter() {
+        if (queue.length === 0) {
+            endQuiz();
+            return;
+        }
+
+        currentLetter = queue.pop();
+        answered = false;
+
+        // Reset UI
+        letterInput.value = '';
+        letterInput.className = 'letter-input';
+        letterInput.disabled = false;
+        submitBtn.disabled = false;
+
+        feedbackBox.className = 'feedback';
+        nextRow.className = 'next-row';
+
+        // Load image
+        const src = `${IMAGE_PATH}${currentLetter}_test.jpg`;
+        imgPlaceholder.style.display = 'none';
+        aslImage.style.display = 'block';
+        imgLabel.style.display = 'block';
+        aslImage.src = src;
+        aslImage.alt = 'ASL letter (hidden)';
+
+        // Update progress
+        const done = TOTAL_ROUNDS - queue.length;
+        progressFill.style.width = ((done - 1) / TOTAL_ROUNDS * 100) + '%';
+
+        letterInput.focus();
+    }
+
+    function submitAnswer() {
+        if (answered || !quizRunning) return;
+
+        const guess = letterInput.value.trim().toUpperCase();
+        if (!guess || !/^[A-Z]$/.test(guess)) {
+            letterInput.focus();
+            return;
+        }
+
+        answered = true;
+        stats.total++;
+        letterInput.disabled = true;
+        submitBtn.disabled = true;
+
+        const isCorrect = guess === currentLetter;
+
+        if (isCorrect) {
+            stats.correct++;
+            letterInput.classList.add('correct-input');
+            feedbackBox.className = 'feedback correct show';
+            feedbackIcon.textContent = '✓';
+            feedbackTitle.textContent = 'Correct!';
+            feedbackMsg.textContent = `That's the letter ${currentLetter} — great job!`;
+        } else {
+            stats.wrong++;
+            letterInput.classList.add('wrong-input');
+            feedbackBox.className = 'feedback wrong show';
+            feedbackIcon.textContent = 'X';
+            feedbackTitle.textContent = `Not quite!`;
+            feedbackMsg.textContent = `You guessed ${guess}, but this is the letter ${currentLetter}.`;
+        }
+
+        markKey(guess, isCorrect);
+        history.unshift({ letter: currentLetter, guess, correct: isCorrect });
+        updateScoreboard();
+        renderHistory();
+        nextRow.className = 'next-row show';
+        progressFill.style.width = (stats.total / TOTAL_ROUNDS * 100) + '%';
+    }
+
+    function endQuiz() {
+        quizRunning = false;
+        inputRow.style.display = 'none';
+        nextRow.className = 'next-row';
+        feedbackBox.className = 'feedback';
+        aslImage.style.display = 'none';
+        imgPlaceholder.style.display = 'block';
+        imgPlaceholder.innerHTML = 'Quiz finished!';
+        imgLabel.style.display = 'none';
+        progressFill.style.width = '100%';
+
+        const pct = Math.round(stats.correct / stats.total * 100);
+        finishMsg.textContent = `You scored ${stats.correct} out of ${stats.total} (${pct}% accuracy). ${pct >= 80 ? 'Excellent work!' : pct >= 50 ? 'Good effort — keep practicing!' : 'Keep at it, you\'ll get there!'}`;
+        finishScreen.classList.add('show');
+    }
+
+    // ── SCOREBOARD ────────────────────────────────────────────────────────
+    function updateScoreboard() {
+        document.getElementById('scoreCorrect').textContent = stats.correct;
+        document.getElementById('scoreWrong').textContent   = stats.wrong;
+        document.getElementById('scoreTotal').textContent   = stats.total;
+        document.getElementById('scoreAccuracy').textContent =
+            stats.total > 0 ? Math.round(stats.correct / stats.total * 100) + '%' : '–';
+    }
+
+    // ── HISTORY ───────────────────────────────────────────────────────────
+    function renderHistory() {
+        if (history.length === 0) {
+            historyList.innerHTML = '<div class="empty-history">No answers yet. Start the quiz!</div>';
+            return;
+        }
+        historyList.innerHTML = history.map(h => `
+            <div class="history-item ${h.correct ? 'h-correct' : 'h-wrong'}">
+                <div class="h-letter" style="color:${h.correct ? '#86efac' : '#fca5a5'}">${h.letter}</div>
+                <div class="h-answer">You guessed: <strong>${h.guess}</strong></div>
+                <div class="h-result">${h.correct ? '✓' : 'X'}</div>
+            </div>
+        `).join('');
+    }
+
+    // ── EVENTS ────────────────────────────────────────────────────────────
+    startBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', () => {
+        finishScreen.classList.remove('show');
+        startQuiz();
+    });
+
+    submitBtn.addEventListener('click', submitAnswer);
+
+    letterInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            if (answered) {
+                loadNextLetter();
+            } else {
+                submitAnswer();
+            }
+        }
+    });
+
+    nextBtn.addEventListener('click', loadNextLetter);
+
+    skipBtn.addEventListener('click', () => {
+        if (!answered) {
+            stats.total++;
+            stats.wrong++;
+            history.unshift({ letter: currentLetter, guess: '–', correct: false });
+            answered = true;
+            updateScoreboard();
+            renderHistory();
+            progressFill.style.width = (stats.total / TOTAL_ROUNDS * 100) + '%';
+        }
+        loadNextLetter();
+    });
+
+    // ── INIT ──────────────────────────────────────────────────────────────
+    buildKeyboard();
+    updateScoreboard();
+</script>
+</body>
+</html>

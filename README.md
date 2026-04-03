@@ -1,6 +1,6 @@
 # ALAsKA Sign Language
 
-teaching machines to sign
+Teaching Machines to Sign
 
 ## Description
 

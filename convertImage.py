@@ -1,9 +1,6 @@
 from PIL import Image
 import numpy as np
  
-path = input("Image path: ")
+path = "asl_alphabet_test/A_test.jpg"
 img = Image.open(path).convert("RGB")
 matrix = np.array(img)
- 
-print(matrix.shape)  # (200, 200, 3)
-print(matrix)

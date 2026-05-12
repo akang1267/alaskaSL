@@ -111,7 +111,9 @@ def analyze_video():
             return jsonify({"error": "Could not open video"}), 400
 
         fps = cap.get(cv2.CAP_PROP_FPS) or 30
-        frame_interval = max(1, int(fps * 0.3))
+        frame_interval = max(1, int(fps * 0.15))  # sample more often
+
+        CONF_THRESHOLD = 0.4  # discard low-confidence predictions
 
         raw_predictions = []   # top-1 per frame (for display)
         frame_top5 = []        # top-5 per frame (for permutation search)
@@ -124,8 +126,16 @@ def analyze_video():
 
             if frame_idx % frame_interval == 0:
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                img = Image.fromarray(rgb)
-                x = tf(img).unsqueeze(0).to(device)
+                pil_img = Image.fromarray(rgb)
+
+                # Center-crop to square (hand is usually centered)
+                w, h = pil_img.size
+                short = min(w, h)
+                left = (w - short) // 2
+                top = (h - short) // 2
+                pil_img = pil_img.crop((left, top, left + short, top + short))
+
+                x = tf(pil_img).unsqueeze(0).to(device)
 
                 with torch.no_grad():
                     logits = model(x)
@@ -142,7 +152,7 @@ def analyze_video():
                     if l not in ("del", "nothing", "space"):
                         t5.append({"letter": l, "confidence": round(float(p), 3)})
 
-                if top1_letter not in ("del", "nothing", "space"):
+                if top1_letter not in ("del", "nothing", "space") and top1_conf >= CONF_THRESHOLD:
                     raw_predictions.append({"letter": top1_letter, "confidence": round(top1_conf, 3)})
                     frame_top5.append(t5)
 
@@ -205,5 +215,5 @@ def analyze_video():
 
 if __name__ == "__main__":
     print(f"Running on device: {device}")
-    print("Open http://localhost:5000 in your browser")
-    app.run(debug=True, port=5000)
+    print("Open http://localhost:8080 in your browser")
+    app.run(debug=True, port=8080)

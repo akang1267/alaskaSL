@@ -3,139 +3,52 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ALAsKA – AI Recognizer</title>
+    <title>ALAsKA – Recognizer</title>
     <style>
-        * { box-sizing: border-box; }
-
-        :root {
-          --bg: #0f172a;
-          --panel: rgba(15, 23, 42, 0.72);
-          --panel-border: rgba(148, 163, 184, 0.16);
-          --text: #e5eefc;
-          --muted: #b2bfd6;
-          --accent: #7c3aed;
-          --shadow: 0 20px 45px rgba(0,0,0,0.28);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-          margin: 0;
-          font-family: Arial, sans-serif;
-          background:
-            radial-gradient(circle at top left, rgba(124,58,237,0.28), transparent 28%),
-            linear-gradient(180deg, #020617 0%, #0f172a 100%);
-          color: var(--text);
+          font-family: Georgia, 'Times New Roman', serif;
+          background: #fff;
+          color: #111;
           min-height: 100vh;
+          -webkit-font-smoothing: antialiased;
         }
 
-        .page {
-          max-width: 1100px;
-          margin: 0 auto;
-          padding: 32px 20px 48px;
-        }
+        .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
 
-        /* HERO */
-        .hero {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 24px;
-          margin-bottom: 24px;
-        }
+        header { margin-bottom: 40px; }
+        h1 { font-size: 24px; font-weight: normal; margin-bottom: 16px; }
 
-        .eyebrow {
-          margin: 0 0 8px;
-          color: #a78bfa;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          font-size: 12px;
-          font-weight: bold;
-        }
-
-        h1 { margin: 0; font-size: 42px; }
-
-        .subtitle {
-          max-width: 700px;
-          color: var(--muted);
-          line-height: 1.5;
-          margin-top: 10px;
-        }
-
-        .status-pill {
-          padding: 10px 14px;
-          border-radius: 999px;
-          background: rgba(124,58,237,0.18);
-          color: #d9cbff;
-          border: 1px solid rgba(124,58,237,0.32);
+        nav { margin-bottom: 48px; }
+        nav a {
           font-size: 14px;
-          white-space: nowrap;
-        }
-
-        /* NAV */
-        .nav-bar {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        }
-
-        .nav-link {
-          padding: 9px 18px;
-          border-radius: 14px;
-          font: inherit;
-          font-size: 14px;
-          cursor: pointer;
+          color: #111;
           text-decoration: none;
-          border: 1px solid rgba(148,163,184,0.22);
-          color: var(--muted);
-          background: transparent;
+          margin-right: 20px;
+          padding-bottom: 2px;
         }
+        nav a:hover { border-bottom: 1px solid #111; }
+        nav a.active { border-bottom: 1px solid #111; }
 
-        .nav-link.active {
-          background: linear-gradient(135deg, var(--accent), #4f46e5);
-          color: white;
-          border-color: transparent;
-          font-weight: bold;
-        }
+        h2 { font-size: 14px; font-weight: normal; color: #666; margin-bottom: 12px; }
 
-        /* GRID */
-        .grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 18px;
-        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 
-        .panel {
-          background: var(--panel);
-          border: 1px solid var(--panel-border);
-          border-radius: 22px;
-          padding: 24px;
-          box-shadow: var(--shadow);
-        }
-
-        h2 { margin-top: 0; font-size: 22px; }
-
-        /* DROP ZONE */
         .drop-zone {
           width: 100%;
           aspect-ratio: 1 / 1;
-          border-radius: 18px;
-          border: 2px dashed rgba(124,58,237,0.4);
-          background: rgba(15,23,42,0.6);
+          border: 1px solid #ddd;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 12px;
           cursor: pointer;
-          transition: border-color 0.2s, background 0.2s;
           position: relative;
           overflow: hidden;
+          transition: border-color 0.2s;
         }
-
-        .drop-zone:hover, .drop-zone.drag-over {
-          border-color: rgba(124,58,237,0.8);
-          background: rgba(124,58,237,0.08);
-        }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: #111; }
 
         .drop-zone img {
           position: absolute;
@@ -143,292 +56,180 @@
           width: 100%;
           height: 100%;
           object-fit: contain;
-          border-radius: 16px;
         }
 
-        .drop-zone .drop-hint {
-          color: var(--muted);
-          text-align: center;
-          font-size: 15px;
-          line-height: 1.6;
-          padding: 20px;
-        }
-
-        .drop-zone .drop-icon { font-size: 40px; }
+        .drop-hint { color: #999; text-align: center; font-size: 14px; padding: 20px; font-style: italic; }
 
         #fileInput { display: none; }
 
-        /* BUTTONS */
         button {
-          border: 0;
+          border: 1px solid #111;
           cursor: pointer;
           font: inherit;
-          border-radius: 14px;
-          padding: 11px 15px;
+          font-size: 13px;
+          padding: 7px 16px;
+          background: #fff;
+          color: #111;
+          margin-right: 6px;
         }
+        button:hover { background: #111; color: #fff; }
 
-        .primary {
-          background: linear-gradient(135deg, var(--accent), #4f46e5);
-          color: white;
-          font-weight: bold;
-        }
+        .controls { margin-top: 12px; }
 
-        .secondary {
-          background: rgba(148,163,184,0.14);
-          color: var(--text);
-        }
+        .result-area { display: flex; flex-direction: column; justify-content: center; }
 
-        .controls {
-          display: flex;
-          gap: 10px;
-          margin-top: 14px;
-          flex-wrap: wrap;
-        }
-
-        /* RESULT */
         .result-box {
-          border-radius: 18px;
-          background: linear-gradient(180deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
-          border: 1px solid rgba(148,163,184,0.12);
-          padding: 28px;
+          padding: 24px 0;
+          border-top: 1px solid #ddd;
+          border-bottom: 1px solid #ddd;
+          text-align: center;
+          min-height: 120px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 180px;
-          text-align: center;
-          margin-bottom: 18px;
         }
 
-        .big-letter {
-          font-size: 100px;
-          font-weight: bold;
-          line-height: 1;
-          background: linear-gradient(135deg, #a78bfa, #60a5fa);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
+        .big-letter { font-size: 72px; font-weight: normal; line-height: 1; }
+        .confidence-text { color: #666; font-size: 13px; margin-top: 4px; }
+        .placeholder-text { color: #999; font-size: 14px; font-style: italic; }
 
-        .confidence-text {
-          color: var(--muted);
-          font-size: 15px;
-          margin-top: 6px;
-        }
+        .top5 { display: flex; flex-direction: column; gap: 6px; margin-top: 20px; }
+        .top5-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
 
-        .placeholder-text {
-          color: var(--muted);
-          font-size: 16px;
-          line-height: 1.6;
-        }
+        .bar-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .bar-letter { width: 16px; text-align: center; }
+        .bar-track { flex: 1; height: 6px; background: #eee; overflow: hidden; }
+        .bar-fill { height: 100%; background: #111; transition: width 0.5s ease; }
+        .bar-pct { width: 36px; text-align: right; color: #666; font-size: 12px; }
 
-        /* TOP 5 BAR CHART */
-        .top5 { display: flex; flex-direction: column; gap: 10px; }
-
-        .bar-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 14px;
-        }
-
-        .bar-label {
-          width: 24px;
-          font-weight: bold;
-          text-align: center;
-          color: #a78bfa;
-        }
-
-        .bar-track {
-          flex: 1;
-          height: 10px;
-          border-radius: 999px;
-          background: rgba(148,163,184,0.1);
-          overflow: hidden;
-        }
-
-        .bar-fill {
-          height: 100%;
-          border-radius: 999px;
-          background: linear-gradient(90deg, var(--accent), #4f46e5);
-          transition: width 0.5s ease;
-        }
-
-        .bar-pct {
-          width: 44px;
-          text-align: right;
-          color: var(--muted);
-          font-size: 13px;
-        }
-
-        /* LOADING */
         .loading-spinner {
           display: none;
-          width: 40px;
-          height: 40px;
-          border: 3px solid rgba(124,58,237,0.2);
-          border-top-color: #7c3aed;
+          width: 24px;
+          height: 24px;
+          border: 2px solid #ddd;
+          border-top-color: #111;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ERROR */
         .error-box {
           display: none;
-          background: rgba(239,68,68,0.1);
-          border: 1px solid rgba(239,68,68,0.3);
-          color: #fca5a5;
-          border-radius: 14px;
-          padding: 14px 18px;
-          font-size: 14px;
+          color: #111;
+          font-size: 13px;
           margin-top: 12px;
+          padding: 8px 0;
+          border-top: 1px solid #ddd;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 600px) {
           .grid { grid-template-columns: 1fr; }
-          .hero { flex-direction: column; }
-          h1 { font-size: 34px; }
+          .page { padding: 32px 16px 60px; }
+          h1 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 <div class="page">
-
-    <header class="hero">
-        <div>
-            <p class="eyebrow">Version 1 Prototype</p>
-            <h1>ALAsKA Sign Language</h1>
-            <p class="subtitle">
-                Upload a photo of a hand sign and the AI will identify which ASL letter it is.
-            </p>
-        </div>
-        <div class="status-pill">AI Recognizer</div>
+    <header>
+        <h1>ALAsKA Sign Language</h1>
     </header>
 
-    <nav class="nav-bar">
-        <a href="index.html" class="nav-link">Translator</a>
-        <a href="test.html" class="nav-link">Alphabet Quiz</a>
-        <a href="#" class="nav-link active">AI Recognizer</a>
+    <nav>
+        <a href="/">Translator</a>
+        <a href="/quiz">Quiz</a>
+        <a href="/recognize" class="active">Recognizer</a>
+        <a href="/video">Video</a>
     </nav>
 
     <main class="grid">
-
-        <!-- LEFT: Upload -->
-        <section class="panel">
-            <h2>Upload a Hand Sign</h2>
+        <section>
+            <h2>Upload a hand sign</h2>
 
             <div class="drop-zone" id="dropZone">
-                <div class="drop-hint" id="dropHint">
-                    <strong>Drop an image here</strong><br>
-                    or click to choose a file
-                </div>
+                <div class="drop-hint" id="dropHint">Drop an image here or click to choose</div>
             </div>
 
             <input type="file" id="fileInput" accept="image/*" />
 
             <div class="controls">
-                <button class="primary" id="analyzeBtn" disabled>Analyze Sign</button>
-                <button class="secondary" id="clearBtn">Clear</button>
+                <button id="analyzeBtn" disabled>Analyze</button>
+                <button id="clearBtn">Clear</button>
             </div>
 
             <div class="error-box" id="errorBox"></div>
         </section>
 
-        <!-- RIGHT: Result -->
-        <section class="panel">
-            <h2>AI Prediction</h2>
+        <section class="result-area">
+            <h2>Prediction</h2>
 
-            <div class="result-box" id="resultBox">
+            <div class="result-box">
                 <div class="loading-spinner" id="spinner"></div>
                 <div id="resultContent">
-                    <div class="placeholder-text">
-                        Upload an image and click<br><strong>Analyze Sign</strong> to see the prediction.
-                    </div>
+                    <div class="placeholder-text">Upload an image and click Analyze.</div>
                 </div>
             </div>
 
             <div class="top5" id="top5Container" style="display:none;">
-                <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">Top 5 guesses</div>
+                <div class="top5-label">Top 5</div>
             </div>
         </section>
-
     </main>
 </div>
 
 <script>
-    const dropZone    = document.getElementById('dropZone');
-    const dropHint    = document.getElementById('dropHint');
-    const fileInput   = document.getElementById('fileInput');
-    const analyzeBtn  = document.getElementById('analyzeBtn');
-    const clearBtn    = document.getElementById('clearBtn');
-    const resultBox   = document.getElementById('resultBox');
+    const dropZone = document.getElementById('dropZone');
+    const dropHint = document.getElementById('dropHint');
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const clearBtn = document.getElementById('clearBtn');
     const resultContent = document.getElementById('resultContent');
-    const spinner     = document.getElementById('spinner');
+    const spinner = document.getElementById('spinner');
     const top5Container = document.getElementById('top5Container');
-    const errorBox    = document.getElementById('errorBox');
+    const errorBox = document.getElementById('errorBox');
 
-    let selectedFile = null;
-    let previewImg = null;
+    let selectedFile = null, previewImg = null;
 
-    // ── Click to open file picker ──
     dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
 
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files[0]) setFile(fileInput.files[0]);
-    });
-
-    // ── Drag and drop ──
-    dropZone.addEventListener('dragover', e => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
     dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
+        e.preventDefault(); dropZone.classList.remove('drag-over');
         if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
     });
 
     function setFile(file) {
         selectedFile = file;
         errorBox.style.display = 'none';
-
-        // Show preview
         if (previewImg) previewImg.remove();
         dropHint.style.display = 'none';
         previewImg = document.createElement('img');
         previewImg.src = URL.createObjectURL(file);
         dropZone.appendChild(previewImg);
-
         analyzeBtn.disabled = false;
         resetResult();
     }
 
     clearBtn.addEventListener('click', () => {
-        selectedFile = null;
-        fileInput.value = '';
+        selectedFile = null; fileInput.value = '';
         if (previewImg) { previewImg.remove(); previewImg = null; }
-        dropHint.style.display = 'flex';
+        dropHint.style.display = 'block';
         analyzeBtn.disabled = true;
         errorBox.style.display = 'none';
         resetResult();
     });
 
     function resetResult() {
-        resultContent.innerHTML = `<div class="placeholder-text">
-            Upload an image and click<br><strong>Analyze Sign</strong> to see the prediction.
-        </div>`;
+        resultContent.innerHTML = '<div class="placeholder-text">Upload an image and click Analyze.</div>';
         top5Container.style.display = 'none';
-        top5Container.innerHTML = '<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">Top 5 guesses</div>';
+        top5Container.innerHTML = '<div class="top5-label">Top 5</div>';
     }
 
-    // ── Analyze ──
     analyzeBtn.addEventListener('click', async () => {
         if (!selectedFile) return;
-
-        // Show loading
         resultContent.innerHTML = '';
         spinner.style.display = 'block';
         top5Container.style.display = 'none';
@@ -441,40 +242,26 @@
         try {
             const res = await fetch('/predict', { method: 'POST', body: formData });
             const data = await res.json();
-
             if (data.error) throw new Error(data.error);
 
             spinner.style.display = 'none';
-
             const pct = Math.round(data.confidence * 100);
-            resultContent.innerHTML = `
-                <div class="big-letter">${data.prediction}</div>
-                <div class="confidence-text">${pct}% confident</div>
-            `;
+            resultContent.innerHTML = '<div class="big-letter">' + data.prediction + '</div><div class="confidence-text">' + pct + '% confident</div>';
 
-            // Top 5 bars
             top5Container.style.display = 'flex';
             data.top5.forEach(item => {
                 const row = document.createElement('div');
                 row.className = 'bar-row';
                 const barPct = Math.round(item.confidence * 100);
-                row.innerHTML = `
-                    <div class="bar-label">${item.letter}</div>
-                    <div class="bar-track">
-                        <div class="bar-fill" style="width:${barPct}%"></div>
-                    </div>
-                    <div class="bar-pct">${barPct}%</div>
-                `;
+                row.innerHTML = '<div class="bar-letter">' + item.letter + '</div><div class="bar-track"><div class="bar-fill" style="width:' + barPct + '%"></div></div><div class="bar-pct">' + barPct + '%</div>';
                 top5Container.appendChild(row);
             });
-
         } catch (err) {
             spinner.style.display = 'none';
             resetResult();
-            errorBox.textContent = 'Error: ' + (err.message || 'Something went wrong. Is the Flask server running?');
+            errorBox.textContent = err.message || 'Something went wrong.';
             errorBox.style.display = 'block';
         }
-
         analyzeBtn.disabled = false;
     });
 </script>

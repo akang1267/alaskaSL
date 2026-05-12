@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALAsKA – Video</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: Georgia, 'Times New Roman', serif;
+          background: #fff;
+          color: #111;
+          min-height: 100vh;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+
+        header { margin-bottom: 40px; }
+        h1 { font-size: 24px; font-weight: normal; margin-bottom: 16px; }
+
+        nav { margin-bottom: 48px; }
+        nav a {
+          font-size: 14px;
+          color: #111;
+          text-decoration: none;
+          margin-right: 20px;
+          padding-bottom: 2px;
+        }
+        nav a:hover { border-bottom: 1px solid #111; }
+        nav a.active { border-bottom: 1px solid #111; }
+
+        h2 { font-size: 14px; font-weight: normal; color: #666; margin-bottom: 12px; }
+
+        .drop-zone {
+          width: 100%;
+          min-height: 160px;
+          border: 1px solid #ddd;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          transition: border-color 0.2s;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: #111; }
+        .drop-zone video {
+          max-width: 100%;
+          max-height: 300px;
+        }
+        .drop-hint { color: #999; text-align: center; font-size: 14px; padding: 20px; font-style: italic; }
+        .file-name { font-size: 13px; color: #666; margin-top: 8px; }
+
+        #fileInput { display: none; }
+
+        button {
+          border: 1px solid #111;
+          cursor: pointer;
+          font: inherit;
+          font-size: 13px;
+          padding: 7px 16px;
+          background: #fff;
+          color: #111;
+          margin-right: 6px;
+        }
+        button:hover { background: #111; color: #fff; }
+        button:disabled { border-color: #ddd; color: #ccc; cursor: default; background: #fff; }
+
+        .controls { margin-top: 12px; }
+
+        .results { margin-top: 48px; display: none; }
+
+        .result-section { margin-bottom: 32px; }
+        .result-label {
+          font-size: 11px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 8px;
+        }
+
+        .corrected-word {
+          font-size: 32px;
+          padding: 20px 0;
+          border-top: 1px solid #ddd;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .deduped-text { font-size: 18px; letter-spacing: 0.08em; }
+
+        .raw-letters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .raw-letter {
+          font-size: 12px;
+          padding: 2px 6px;
+          border: 1px solid #eee;
+        }
+        .raw-letter .conf { color: #999; font-size: 10px; margin-left: 2px; }
+
+        .loading {
+          display: none;
+          padding: 24px 0;
+          text-align: center;
+          color: #666;
+          font-size: 14px;
+          font-style: italic;
+        }
+
+        .spinner {
+          display: inline-block;
+          width: 18px;
+          height: 18px;
+          border: 2px solid #ddd;
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          vertical-align: middle;
+          margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-box {
+          display: none;
+          color: #111;
+          font-size: 13px;
+          margin-top: 12px;
+          padding: 8px 0;
+          border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 600px) {
+          .page { padding: 32px 16px 60px; }
+          h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <h1>ALAsKA Sign Language</h1>
+    </header>
+
+    <nav>
+        <a href="/">Translator</a>
+        <a href="/quiz">Quiz</a>
+        <a href="/recognize">Recognizer</a>
+        <a href="/video" class="active">Video</a>
+    </nav>
+
+    <section>
+        <h2>Upload a video of someone signing</h2>
+
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-hint" id="dropHint">Drop a video here or click to choose</div>
+        </div>
+
+        <input type="file" id="fileInput" accept="video/*" />
+
+        <div class="controls">
+            <button id="analyzeBtn" disabled>Analyze</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+    </section>
+
+    <div class="loading" id="loading">
+        <span class="spinner"></span>Analyzing video frames...
+    </div>
+
+    <section class="results" id="results">
+        <div class="result-section">
+            <div class="result-label">Corrected word</div>
+            <div class="corrected-word" id="correctedWord"></div>
+        </div>
+
+        <div class="result-section">
+            <div class="result-label">Deduplicated letters</div>
+            <div class="deduped-text" id="dedupedText"></div>
+        </div>
+
+        <div class="result-section">
+            <div class="result-label">Raw frame predictions</div>
+            <div class="raw-letters" id="rawLetters"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const dropHint = document.getElementById('dropHint');
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const errorBox = document.getElementById('errorBox');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const correctedWord = document.getElementById('correctedWord');
+    const dedupedText = document.getElementById('dedupedText');
+    const rawLetters = document.getElementById('rawLetters');
+
+    let selectedFile = null;
+    let previewEl = null;
+
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    fileInput.addEventListener('change', function() { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault(); dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+
+    function setFile(file) {
+        selectedFile = file;
+        errorBox.style.display = 'none';
+        results.style.display = 'none';
+
+        if (previewEl) previewEl.remove();
+        dropHint.style.display = 'none';
+
+        var vid = document.createElement('video');
+        vid.src = URL.createObjectURL(file);
+        vid.controls = true;
+        vid.muted = true;
+        vid.style.maxWidth = '100%';
+        vid.style.maxHeight = '300px';
+        dropZone.appendChild(vid);
+        previewEl = vid;
+
+        analyzeBtn.disabled = false;
+    }
+
+    clearBtn.addEventListener('click', function() {
+        selectedFile = null;
+        fileInput.value = '';
+        if (previewEl) { previewEl.remove(); previewEl = null; }
+        dropHint.style.display = 'block';
+        analyzeBtn.disabled = true;
+        errorBox.style.display = 'none';
+        results.style.display = 'none';
+        loading.style.display = 'none';
+    });
+
+    analyzeBtn.addEventListener('click', async function() {
+        if (!selectedFile) return;
+        loading.style.display = 'block';
+        results.style.display = 'none';
+        analyzeBtn.disabled = true;
+        errorBox.style.display = 'none';
+
+        var formData = new FormData();
+        formData.append('video', selectedFile);
+
+        try {
+            var res = await fetch('/analyze-video', { method: 'POST', body: formData });
+            var data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            loading.style.display = 'none';
+
+            correctedWord.textContent = data.corrected;
+            dedupedText.textContent = data.deduplicated;
+
+            rawLetters.innerHTML = '';
+            data.raw.forEach(function(pred) {
+                var el = document.createElement('span');
+                el.className = 'raw-letter';
+                el.innerHTML = pred.letter + '<span class="conf">' + Math.round(pred.confidence * 100) + '%</span>';
+                rawLetters.appendChild(el);
+            });
+
+            results.style.display = 'block';
+        } catch (err) {
+            loading.style.display = 'none';
+            errorBox.textContent = err.message || 'Something went wrong.';
+            errorBox.style.display = 'block';
+        }
+        analyzeBtn.disabled = false;
+    });
+</script>
+</body>
+</html>

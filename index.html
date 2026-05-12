@@ -5,329 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ALAsKA Sign Language</title>
     <style>
-        * {
-          box-sizing: border-box;
-        }
-
-        :root {
-          --bg: #0f172a;
-          --panel: rgba(15, 23, 42, 0.72);
-          --panel-border: rgba(148, 163, 184, 0.16);
-          --text: #e5eefc;
-          --muted: #b2bfd6;
-          --accent: #7c3aed;
-          --chip: rgba(124, 58, 237, 0.15);
-          --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-          margin: 0;
-          font-family: Arial, sans-serif;
-          background:
-            radial-gradient(circle at top left, rgba(124, 58, 237, 0.28), transparent 28%),
-            linear-gradient(180deg, #020617 0%, #0f172a 100%);
-          color: var(--text);
+          font-family: Georgia, 'Times New Roman', serif;
+          background: #fff;
+          color: #111;
           min-height: 100vh;
+          -webkit-font-smoothing: antialiased;
         }
 
-        .page {
-          max-width: 1100px;
-          margin: 0 auto;
-          padding: 32px 20px 48px;
-        }
+        .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
 
-        .hero {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 24px;
-          margin-bottom: 24px;
-        }
+        header { margin-bottom: 40px; }
+        h1 { font-size: 24px; font-weight: normal; margin-bottom: 16px; }
 
-        .eyebrow {
-          margin: 0 0 8px;
-          color: #a78bfa;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          font-size: 12px;
-          font-weight: bold;
-        }
-
-        h1 {
-          margin: 0;
-          font-size: 42px;
-        }
-
-        .subtitle {
-          max-width: 700px;
-          color: var(--muted);
-          line-height: 1.5;
-          margin-top: 10px;
-        }
-
-        .status-pill {
-          padding: 10px 14px;
-          border-radius: 999px;
-          background: rgba(34, 197, 94, 0.15);
-          color: #b7f7c9;
-          border: 1px solid rgba(34, 197, 94, 0.25);
+        nav { margin-bottom: 48px; }
+        nav a {
           font-size: 14px;
-          white-space: nowrap;
+          color: #111;
+          text-decoration: none;
+          margin-right: 20px;
+          padding-bottom: 2px;
         }
+        nav a:hover { border-bottom: 1px solid #111; }
+        nav a.active { border-bottom: 1px solid #111; }
 
-        .grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 18px;
-        }
-
-        .panel {
-          background: var(--panel);
-          border: 1px solid var(--panel-border);
-          border-radius: 22px;
-          padding: 20px;
-          box-shadow: var(--shadow);
-        }
-
-        h2 {
-          margin-top: 0;
-          font-size: 22px;
-        }
-
-        label {
-          display: block;
-          margin-bottom: 10px;
-          color: var(--muted);
-          font-size: 14px;
-        }
+        h2 { font-size: 14px; font-weight: normal; color: #666; margin-bottom: 12px; }
 
         textarea {
           width: 100%;
-          min-height: 180px;
+          min-height: 120px;
           resize: vertical;
-          border-radius: 16px;
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          padding: 16px;
+          border: 1px solid #ddd;
+          padding: 12px;
           font: inherit;
-          color: var(--text);
-          background: rgba(15, 23, 42, 0.7);
+          font-size: 15px;
+          color: #111;
+          background: #fff;
           outline: none;
         }
+        textarea:focus { border-color: #111; }
 
-        textarea:focus {
-          border-color: rgba(124, 58, 237, 0.75);
-        }
-
-        .controls {
-          display: flex;
-          gap: 10px;
-          margin-top: 14px;
-          flex-wrap: wrap;
-        }
+        .controls { margin-top: 12px; }
 
         button {
-          border: 0;
+          border: 1px solid #111;
           cursor: pointer;
           font: inherit;
-          border-radius: 14px;
-          padding: 11px 15px;
+          font-size: 13px;
+          padding: 7px 16px;
+          background: #fff;
+          color: #111;
+          margin-right: 6px;
         }
+        button:hover { background: #111; color: #fff; }
 
-        .primary {
-          background: linear-gradient(135deg, var(--accent), #4f46e5);
-          color: white;
-          font-weight: bold;
-        }
-
-        .secondary {
-          background: rgba(148, 163, 184, 0.14);
-          color: var(--text);
-        }
-
-        .ghost {
-          background: transparent;
-          border: 1px solid rgba(148, 163, 184, 0.22);
-          color: var(--muted);
-        }
-
-        .quick-examples {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          align-items: center;
-          margin-top: 16px;
-          color: var(--muted);
-        }
-
+        .examples { margin-top: 16px; font-size: 13px; color: #666; }
+        .examples span { margin-right: 8px; }
         .chip {
-          background: var(--chip);
-          color: #d9cbff;
-          border: 1px solid rgba(124, 58, 237, 0.25);
-          padding: 8px 12px;
+          border: 1px solid #ddd;
+          background: #fff;
+          color: #111;
+          padding: 4px 10px;
+          font-size: 13px;
+          cursor: pointer;
+          margin-right: 4px;
         }
+        .chip:hover { border-color: #111; }
 
-        .output-box {
-          min-height: 260px;
-          border-radius: 18px;
-          background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-          border: 1px solid rgba(148, 163, 184, 0.12);
-          padding: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .output { margin-top: 48px; }
+
+        .gloss-result {
+          min-height: 60px;
+          padding: 20px 0;
+          border-top: 1px solid #ddd;
+          border-bottom: 1px solid #ddd;
           text-align: center;
         }
 
-        .placeholder {
-          color: var(--muted);
-          font-size: 18px;
-          line-height: 1.5;
-        }
+        .placeholder { color: #999; font-size: 14px; font-style: italic; }
 
-        .timeline {
-          min-height: 88px;
-          border-radius: 16px;
-          border: 1px dashed rgba(148, 163, 184, 0.24);
-          padding: 14px;
+        .gloss-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+        .gloss-text { font-size: 22px; letter-spacing: 0.04em; }
+
+        .letter-images {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 14px;
-          color: var(--muted);
+          gap: 8px;
+          margin-top: 20px;
+          align-items: flex-end;
         }
 
-        .token {
-          padding: 10px 12px;
-          border-radius: 12px;
-          background: rgba(59, 130, 246, 0.14);
-          color: #cde2ff;
-          border: 1px solid rgba(59, 130, 246, 0.25);
+        .letter-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .letter-card img { width: 48px; height: 48px; object-fit: contain; }
+        .letter-label { font-size: 11px; color: #666; }
+        .space-marker { width: 12px; color: #ccc; font-size: 11px; text-align: center; align-self: center; }
+        .empty-msg { color: #999; font-size: 13px; font-style: italic; }
+
+        .error-box {
+          display: none;
+          color: #111;
+          font-size: 13px;
+          margin-top: 12px;
+          padding: 8px 0;
+          border-top: 1px solid #ddd;
         }
 
-        @media (max-width: 900px) {
-          .grid {
-            grid-template-columns: 1fr;
-          }
-
-          .hero {
-            flex-direction: column;
-          }
-
-          h1 {
-            font-size: 34px;
-          }
+        @media (max-width: 600px) {
+          .page { padding: 32px 16px 60px; }
+          h1 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 <div class="page">
-    <header class="hero">
-        <div>
-            <p class="eyebrow">Version 1 Prototype</p>
-            <h1>ALAsKA Sign Language</h1>
-            <p class="subtitle">
-                Enter a word or sentence to preview the interface for your AI sign language translator.
-            </p>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
-        <div class="status-pill">Static Demo</div>
-        <a href="test.html" style="text-decoration:none; background:linear-gradient(135deg,#7c3aed,#4f46e5); color:white; font-weight:bold; padding:10px 18px; border-radius:14px; font-family:Arial,sans-serif; font-size:14px;"> Practice Alphabet -></a>
-</div>
+    <header>
+        <h1>ALAsKA Sign Language</h1>
     </header>
 
-    <main class="grid">
-        <section class="panel">
-            <h2>Text Input</h2>
-            <label for="inputText">Word or sentence</label>
-            <textarea id="inputText" placeholder="Type something like: Hello, how are you?"></textarea>
+    <nav>
+        <a href="/" class="active">Translator</a>
+        <a href="/quiz">Quiz</a>
+        <a href="/recognize">Recognizer</a>
+        <a href="/video">Video</a>
+    </nav>
 
-            <div class="controls">
-                <button id="translateBtn" class="primary">Generate</button>
-                <button id="clearBtn" class="secondary">Clear</button>
-            </div>
+    <section>
+        <h2>Enter text</h2>
+        <textarea id="inputText" placeholder="How are you doing?"></textarea>
 
-            <div class="quick-examples">
-                <span>Try:</span>
-                <button class="chip" data-example="Hello">Hello</button>
-                <button class="chip" data-example="Thank you">Thank you</button>
-                <button class="chip" data-example="How are you?">How are you?</button>
-                <button class="chip" data-example="I need help">I need help</button>
-            </div>
-        </section>
+        <div class="controls">
+            <button id="translateBtn">Translate</button>
+            <button id="clearBtn">Clear</button>
+        </div>
 
-        <section class="panel">
-            <h2>Output Preview</h2>
+        <div class="examples">
+            <span>Try:</span>
+            <button class="chip" data-example="Hello">Hello</button>
+            <button class="chip" data-example="Thank you">Thank you</button>
+            <button class="chip" data-example="How are you?">How are you?</button>
+        </div>
 
-            <div class="controls">
-                <button class="ghost">Replay</button>
-                <button class="ghost">Pause</button>
-            </div>
+        <div class="error-box" id="errorBox"></div>
+    </section>
 
-            <div class="output-box">
-                <div id="outputText" class="placeholder">
-                    Animation preview will appear here later.
-                </div>
-            </div>
+    <section class="output">
+        <h2>ASL Translation</h2>
 
-            <div id="timeline" class="timeline">
-                No generated sequence yet.
-            </div>
-        </section>
-    </main>
+        <div class="gloss-result">
+            <div id="outputContent" class="placeholder">Enter text and click Translate.</div>
+        </div>
+
+        <div class="letter-images" id="letterImages">
+            <span class="empty-msg">Hand-sign images will appear here.</span>
+        </div>
+    </section>
 </div>
 
 <script>
     const inputText = document.getElementById("inputText");
     const translateBtn = document.getElementById("translateBtn");
     const clearBtn = document.getElementById("clearBtn");
-    const outputText = document.getElementById("outputText");
-    const timeline = document.getElementById("timeline");
+    const outputContent = document.getElementById("outputContent");
+    const letterImages = document.getElementById("letterImages");
+    const errorBox = document.getElementById("errorBox");
     const chips = document.querySelectorAll(".chip");
 
-    function tokenize(text) {
-      return text
-        .trim()
-        .split(/\\s+/)
-        .map(word => word.replace(/[^a-zA-Z']/g, ""))
-        .filter(Boolean);
-    }
+    translateBtn.addEventListener("click", async () => {
+        const value = inputText.value.trim();
+        if (!value) {
+            outputContent.className = "placeholder";
+            outputContent.textContent = "Please enter a word or sentence.";
+            letterImages.innerHTML = '<span class="empty-msg">Hand-sign images will appear here.</span>';
+            return;
+        }
 
-    translateBtn.addEventListener("click", () => {
-      const value = inputText.value.trim();
-      const tokens = tokenize(value);
+        errorBox.style.display = "none";
+        outputContent.className = "placeholder";
+        outputContent.textContent = "Translating...";
+        translateBtn.disabled = true;
 
-      if (!value) {
-        outputText.textContent = "Please enter a word or sentence.";
-        timeline.textContent = "No generated sequence yet.";
-        return;
-      }
+        try {
+            const res = await fetch("/translate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: value })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
 
-      outputText.textContent = 'Preview generated for: "' + value + '"';
+            outputContent.innerHTML = '<div class="gloss-label">ASL Gloss</div><div class="gloss-text">' + data.gloss + '</div>';
+            outputContent.className = "";
 
-      timeline.innerHTML = "";
-      if (tokens.length === 0) {
-        timeline.textContent = "No generated sequence yet.";
-        return;
-      }
-
-      tokens.forEach((token, index) => {
-        const el = document.createElement("div");
-        el.className = "token";
-        el.textContent = (index + 1) + ". " + token;
-        timeline.appendChild(el);
-      });
+            letterImages.innerHTML = "";
+            const glossWords = data.gloss.split(" ");
+            glossWords.forEach((word, wi) => {
+                for (const ch of word) {
+                    if (/[A-Z]/i.test(ch)) {
+                        const card = document.createElement("div");
+                        card.className = "letter-card";
+                        const letter = ch.toUpperCase();
+                        card.innerHTML = '<img src="asl_alphabet_test/' + letter + '_test.jpg" alt="' + letter + '" /><span class="letter-label">' + letter + '</span>';
+                        letterImages.appendChild(card);
+                    }
+                }
+                if (wi < glossWords.length - 1) {
+                    const spacer = document.createElement("div");
+                    spacer.className = "space-marker";
+                    spacer.textContent = "|";
+                    letterImages.appendChild(spacer);
+                }
+            });
+        } catch (err) {
+            outputContent.className = "placeholder";
+            outputContent.textContent = "Enter text and click Translate.";
+            errorBox.textContent = err.message || "Something went wrong.";
+            errorBox.style.display = "block";
+        }
+        translateBtn.disabled = false;
     });
 
     clearBtn.addEventListener("click", () => {
-      inputText.value = "";
-      outputText.textContent = "Animation preview will appear here later.";
-      timeline.textContent = "No generated sequence yet.";
+        inputText.value = "";
+        outputContent.className = "placeholder";
+        outputContent.textContent = "Enter text and click Translate.";
+        letterImages.innerHTML = '<span class="empty-msg">Hand-sign images will appear here.</span>';
+        errorBox.style.display = "none";
     });
 
     chips.forEach(chip => {
-      chip.addEventListener("click", () => {
-        inputText.value = chip.dataset.example;
-      });
+        chip.addEventListener("click", () => { inputText.value = chip.dataset.example; });
     });
 </script>
 </body>

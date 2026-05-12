@@ -3,12 +3,18 @@ import torch, json
 from PIL import Image
 from torchvision import transforms, models
 import torch.nn as nn
-import io, os
+import io, os, tempfile, cv2
+from itertools import product as cart_product
+from englishtoglossified import translate_to_asl_gloss
+from spellchecker import SpellChecker
 
-app = Flask(__name__, static_folder=".")
+spell = SpellChecker()
+
+app = Flask(__name__, static_folder=".", static_url_path="")
 
 # ── Load model once at startup ──────────────────────────────────────────
 IMG_SIZE = 128
+PRE_SIZE = 200
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
 with open("asl_classes.json") as f:
@@ -20,17 +26,31 @@ model.load_state_dict(torch.load("asl_resnet18.pt", map_location=device))
 model = model.to(device).eval()
 
 tf = transforms.Compose([
+    transforms.Resize((PRE_SIZE, PRE_SIZE)),
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225]),
 ])
 
-# ── Routes ───────────────────────────────────────────────────────────────
+# ── Page routes ─────────────────────────────────────────────────────────
 @app.route("/")
 def index():
+    return send_from_directory(".", "index.html")
+
+@app.route("/quiz")
+def quiz():
+    return send_from_directory(".", "test.html")
+
+@app.route("/recognize")
+def recognize():
     return send_from_directory(".", "recognize.html")
 
+@app.route("/video")
+def video():
+    return send_from_directory(".", "video.html")
+
+# ── API routes ──────────────────────────────────────────────────────────
 @app.route("/predict", methods=["POST"])
 def predict():
     if "image" not in request.files:
@@ -59,6 +79,129 @@ def predict():
     return jsonify({"prediction": results[0]["letter"],
                     "confidence": results[0]["confidence"],
                     "top5": results})
+
+@app.route("/translate", methods=["POST"])
+def translate():
+    data = request.get_json()
+    if not data or "text" not in data:
+        return jsonify({"error": "No text provided"}), 400
+
+    text = data["text"].strip()
+    if not text:
+        return jsonify({"error": "Empty text"}), 400
+
+    gloss = translate_to_asl_gloss(text)
+    letters = [ch for ch in gloss if ch.isalpha()]
+
+    return jsonify({"gloss": gloss, "letters": letters})
+
+@app.route("/analyze-video", methods=["POST"])
+def analyze_video():
+    if "video" not in request.files:
+        return jsonify({"error": "No video uploaded"}), 400
+
+    file = request.files["video"]
+    tmp = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+    try:
+        file.save(tmp.name)
+        tmp.close()
+
+        cap = cv2.VideoCapture(tmp.name)
+        if not cap.isOpened():
+            return jsonify({"error": "Could not open video"}), 400
+
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30
+        frame_interval = max(1, int(fps * 0.3))
+
+        raw_predictions = []   # top-1 per frame (for display)
+        frame_top5 = []        # top-5 per frame (for permutation search)
+        frame_idx = 0
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            if frame_idx % frame_interval == 0:
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                img = Image.fromarray(rgb)
+                x = tf(img).unsqueeze(0).to(device)
+
+                with torch.no_grad():
+                    logits = model(x)
+                    probs = torch.softmax(logits, dim=1)[0]
+                    top5 = torch.topk(probs, 5)
+
+                top1_letter = classes[top5.indices[0].item()]
+                top1_conf = float(top5.values[0])
+
+                # Filter out non-letter classes
+                t5 = []
+                for idx, p in zip(top5.indices.tolist(), top5.values.tolist()):
+                    l = classes[idx]
+                    if l not in ("del", "nothing", "space"):
+                        t5.append({"letter": l, "confidence": round(float(p), 3)})
+
+                if top1_letter not in ("del", "nothing", "space"):
+                    raw_predictions.append({"letter": top1_letter, "confidence": round(top1_conf, 3)})
+                    frame_top5.append(t5)
+
+            frame_idx += 1
+
+        cap.release()
+
+        # Group consecutive frames by top-1 prediction
+        MIN_RUN = 3
+        groups = []
+        for i, pred in enumerate(raw_predictions):
+            if groups and groups[-1]["letter"] == pred["letter"]:
+                groups[-1]["count"] += 1
+                groups[-1]["frame_indices"].append(i)
+            else:
+                groups.append({"letter": pred["letter"], "count": 1, "frame_indices": [i]})
+
+        # Keep only groups that meet the minimum run length
+        valid_groups = [g for g in groups if g["count"] >= MIN_RUN]
+        deduped_str = "".join(g["letter"] for g in valid_groups)
+
+        # For each valid group, find top 5 candidate letters by total confidence
+        candidates_per_pos = []
+        for group in valid_groups:
+            letter_scores = {}
+            for fi in group["frame_indices"]:
+                for pred in frame_top5[fi]:
+                    letter_scores[pred["letter"]] = letter_scores.get(pred["letter"], 0) + pred["confidence"]
+            sorted_letters = sorted(letter_scores.items(), key=lambda x: -x[1])
+            candidates_per_pos.append([l for l, _ in sorted_letters[:5]])
+
+        # Try all permutations of candidates to find a real word
+        corrected = deduped_str.lower()
+        if candidates_per_pos:
+            # Cap candidates per position to avoid explosion on long words
+            max_cands = 5 if len(candidates_per_pos) <= 6 else 3
+            limited = [c[:max_cands] for c in candidates_per_pos]
+
+            all_combos = ["".join(combo).lower() for combo in cart_product(*limited)]
+            known = spell.known(all_combos)
+
+            if known:
+                # Pick the first known word (product order = highest-confidence first)
+                for word in all_combos:
+                    if word in known:
+                        corrected = word
+                        break
+            else:
+                # Fall back to spell correction on top-1 sequence
+                corrected = spell.correction(deduped_str.lower()) or deduped_str.lower()
+
+        return jsonify({
+            "raw": raw_predictions,
+            "deduplicated": deduped_str,
+            "corrected": corrected
+        })
+
+    finally:
+        os.unlink(tmp.name)
 
 if __name__ == "__main__":
     print(f"Running on device: {device}")

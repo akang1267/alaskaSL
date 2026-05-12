@@ -20,9 +20,8 @@ def translate_to_asl_gloss(text):
     # 4. Return as uppercase "Gloss"
     return " ".join(filtered).upper()
 
-# Testing function
-input_text = "How are you doing?"
-asl_gloss = translate_to_asl_gloss(input_text)
-
-print(f"English: {input_text}")
-print(f"ASL Gloss: {asl_gloss}") 
+if __name__ == "__main__":
+    input_text = "How are you doing?"
+    asl_gloss = translate_to_asl_gloss(input_text)
+    print(f"English: {input_text}")
+    print(f"ASL Gloss: {asl_gloss}")

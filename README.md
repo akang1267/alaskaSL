@@ -8,6 +8,21 @@ We will train a machine learning model that can translate English into 3D animat
 
 ## Features
 
+## Backend Testing
+
+This project uses `pytest` to test the backend components of the ASL recognition system.
+
+The tests verify:
+- Flask routes load correctly
+- The `/predict` endpoint handles valid and invalid uploads
+- The AI model files exist and load properly
+- English-to-ASL gloss conversion works as expected
+- Required ASL test images are present
+
+### Running the Tests
+<img width="1198" height="220" alt="image" src="https://github.com/user-attachments/assets/0ba80592-7a3e-45de-b613-981e894aa478" />
+
+Install dependencies -> python3 -m pip install pytest flask torch torchvision pillow
 
 ### Dependencies
 

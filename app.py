@@ -214,6 +214,7 @@ def analyze_video():
         os.unlink(tmp.name)
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
     print(f"Running on device: {device}")
-    print("Open http://localhost:8080 in your browser")
-    app.run(debug=True, port=8080)
+    print(f"Open http://localhost:{port} in your browser")
+    app.run(debug=False, host="0.0.0.0", port=port)

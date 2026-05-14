@@ -31,7 +31,7 @@ Install dependencies -> python3 -m pip install pytest flask torch torchvision pi
 * [SPMP](https://docs.google.com/document/d/1T5rsPHlNBMlv_SihTYrO5H_pMtuI2xUc884wbabGsHk/edit?usp=sharing)
 * [SRS](https://docs.google.com/document/d/1xnjBc4kME9NMfpOasItESSXIUbekakHM0UWyl5jXB64/edit?usp=sharing)
 * [SDD](https://docs.google.com/document/d/1UrCCcOnboW1EEhURV0XcninvyhwnLd5MNqnE3nYJzgc/edit?usp=sharing)
-* [STD](https://docs.google.com/document/d/1Fx-v-8n7OnYPceMX9YJhgmEQJqM8dBE3iMTQZFqqv7g/edit?usp=sharing)
+* [STD](https://docs.google.com/document/d/1XGa03qev4dvM-oxgXENRlKwuK-aVK09MFItk4qJcsDo/edit?usp=sharing)
 
 ## Authors
 

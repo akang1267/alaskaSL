@@ -1,3 +1,14 @@
+---
+title: ALAsKA Sign Language
+emoji: 🤟
+colorFrom: gray
+colorTo: gray
+sdk: python
+sdk_version: "3.11"
+app_file: app.py
+pinned: false
+---
+
 # ALAsKA Sign Language
 
 Teaching Machines to Sign

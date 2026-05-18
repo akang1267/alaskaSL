@@ -248,9 +248,11 @@ def generate_animation():
                     "role": "user",
                     "content": (
                         f'Describe the ASL sign for the word "{word}" as a single, detailed video prompt. '
+                        "The person is wearing a blue sweatshirt. "
                         "Describe the complete motion from start to finish: starting hand shape and position, "
                         "the movement trajectory, and the ending position. Be specific about hand shape, "
                         "palm orientation, finger positions, and movement direction. "
+                        "Always mention the person is wearing a blue sweatshirt in your description. "
                         "Write it as one continuous description suitable for a text-to-video AI model. "
                         "Return ONLY valid JSON with no extra text, in this exact format:\n"
                         '{"description": "the full motion description"}'

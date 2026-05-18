@@ -7,8 +7,8 @@ import io, os, tempfile, cv2
 from itertools import product as cart_product
 from englishtoglossified import translate_to_asl_gloss
 from spellchecker import SpellChecker
-import anthropic
 import replicate
+import requests as http_requests
 
 spell = SpellChecker()
 
@@ -229,29 +229,41 @@ def generate_animation():
     if not word:
         return jsonify({"error": "Empty word"}), 400
 
-    # Step 1: Use Claude to generate a video prompt description (with fallback)
+    # Step 1: Use Claude API (via requests) to generate a video prompt description
     description = None
     try:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         print(f"[Animation] ANTHROPIC_API_KEY set: {bool(api_key)}")
-        claude = anthropic.Anthropic(api_key=api_key)
-        msg = claude.messages.create(
-            model="claude-sonnet-4-5-20250929",
-            max_tokens=1024,
-            messages=[{
-                "role": "user",
-                "content": (
-                    f'Describe the ASL sign for the word "{word}" as a single, detailed video prompt. '
-                    "Describe the complete motion from start to finish: starting hand shape and position, "
-                    "the movement trajectory, and the ending position. Be specific about hand shape, "
-                    "palm orientation, finger positions, and movement direction. "
-                    "Write it as one continuous description suitable for a text-to-video AI model. "
-                    "Return ONLY valid JSON with no extra text, in this exact format:\n"
-                    '{"description": "the full motion description"}'
-                )
-            }]
+        resp = http_requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-sonnet-4-5-20250929",
+                "max_tokens": 1024,
+                "messages": [{
+                    "role": "user",
+                    "content": (
+                        f'Describe the ASL sign for the word "{word}" as a single, detailed video prompt. '
+                        "Describe the complete motion from start to finish: starting hand shape and position, "
+                        "the movement trajectory, and the ending position. Be specific about hand shape, "
+                        "palm orientation, finger positions, and movement direction. "
+                        "Write it as one continuous description suitable for a text-to-video AI model. "
+                        "Return ONLY valid JSON with no extra text, in this exact format:\n"
+                        '{"description": "the full motion description"}'
+                    )
+                }]
+            },
+            timeout=30,
         )
-        raw = msg.content[0].text.strip()
+        print(f"[Animation] Claude response status: {resp.status_code}")
+        if resp.status_code != 200:
+            raise Exception(f"Claude API returned {resp.status_code}: {resp.text}")
+        msg_data = resp.json()
+        raw = msg_data["content"][0]["text"].strip()
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[1]
             raw = raw.rsplit("```", 1)[0]
@@ -259,7 +271,7 @@ def generate_animation():
         claude_data = json.loads(raw)
         description = claude_data["description"]
     except Exception as e:
-        print(f"[Animation] Claude failed, using fallback: {type(e).__name__}: {e}")
+        print(f"[Animation] Claude failed: {type(e).__name__}: {e}")
         description = f"Performing the ASL sign for the word {word}, showing the hand shape, position, and movement from start to finish"
 
     # Step 2: Generate a video using Replicate Wan 2.5

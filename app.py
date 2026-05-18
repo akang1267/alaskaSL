@@ -262,7 +262,7 @@ def generate_animation():
 
     # Step 2: Generate a video using Replicate Wan 2.5
     prompt = (
-        "A close-up video of a person's hands performing American Sign Language. "
+        "A close-up video of a person wearing a blue sweatshirt performing American Sign Language with their hands. "
         f"{description}. "
         "Front-facing view, plain white background, realistic, studio lighting, "
         "detailed hands, smooth continuous motion."

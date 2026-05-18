@@ -229,9 +229,12 @@ def generate_animation():
     if not word:
         return jsonify({"error": "Empty word"}), 400
 
-    # Step 1: Use Claude to generate a video prompt description
+    # Step 1: Use Claude to generate a video prompt description (with fallback)
+    description = None
     try:
-        claude = anthropic.Anthropic()
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        print(f"[Animation] ANTHROPIC_API_KEY set: {bool(api_key)}")
+        claude = anthropic.Anthropic(api_key=api_key)
         msg = claude.messages.create(
             model="claude-sonnet-4-5-20250929",
             max_tokens=1024,
@@ -255,10 +258,9 @@ def generate_animation():
             raw = raw.strip()
         claude_data = json.loads(raw)
         description = claude_data["description"]
-    except json.JSONDecodeError:
-        return jsonify({"error": "Failed to parse description from Claude"}), 500
     except Exception as e:
-        return jsonify({"error": f"Claude API error: {str(e)}"}), 500
+        print(f"[Animation] Claude failed, using fallback: {type(e).__name__}: {e}")
+        description = f"Performing the ASL sign for the word {word}, showing the hand shape, position, and movement from start to finish"
 
     # Step 2: Generate a video using Replicate Wan 2.5
     prompt = (

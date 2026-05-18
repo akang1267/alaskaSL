@@ -7,6 +7,8 @@ import io, os, tempfile, cv2
 from itertools import product as cart_product
 from englishtoglossified import translate_to_asl_gloss
 from spellchecker import SpellChecker
+import anthropic
+import replicate
 
 spell = SpellChecker()
 
@@ -49,6 +51,10 @@ def recognize():
 @app.route("/video")
 def video():
     return send_from_directory(".", "video.html")
+
+@app.route("/animations")
+def animations():
+    return send_from_directory(".", "animations.html")
 
 # ── API routes ──────────────────────────────────────────────────────────
 @app.route("/predict", methods=["POST"])
@@ -212,6 +218,73 @@ def analyze_video():
 
     finally:
         os.unlink(tmp.name)
+
+@app.route("/generate-animation", methods=["POST"])
+def generate_animation():
+    data = request.get_json()
+    if not data or "word" not in data:
+        return jsonify({"error": "No word provided"}), 400
+
+    word = data["word"].strip().upper()
+    if not word:
+        return jsonify({"error": "Empty word"}), 400
+
+    # Step 1: Use Claude to generate a video prompt description
+    try:
+        claude = anthropic.Anthropic()
+        msg = claude.messages.create(
+            model="claude-sonnet-4-5-20250929",
+            max_tokens=1024,
+            messages=[{
+                "role": "user",
+                "content": (
+                    f'Describe the ASL sign for the word "{word}" as a single, detailed video prompt. '
+                    "Describe the complete motion from start to finish: starting hand shape and position, "
+                    "the movement trajectory, and the ending position. Be specific about hand shape, "
+                    "palm orientation, finger positions, and movement direction. "
+                    "Write it as one continuous description suitable for a text-to-video AI model. "
+                    "Return ONLY valid JSON with no extra text, in this exact format:\n"
+                    '{"description": "the full motion description"}'
+                )
+            }]
+        )
+        raw = msg.content[0].text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[1]
+            raw = raw.rsplit("```", 1)[0]
+            raw = raw.strip()
+        claude_data = json.loads(raw)
+        description = claude_data["description"]
+    except json.JSONDecodeError:
+        return jsonify({"error": "Failed to parse description from Claude"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Claude API error: {str(e)}"}), 500
+
+    # Step 2: Generate a video using Replicate Wan 2.5
+    prompt = (
+        "A close-up video of a person's hands performing American Sign Language. "
+        f"{description}. "
+        "Front-facing view, plain white background, realistic, studio lighting, "
+        "detailed hands, smooth continuous motion."
+    )
+
+    try:
+        print(f"[Animation] Generating video for '{word}'...")
+        output = replicate.run(
+            "wavespeedai/wan-2.1-t2v-480p",
+            input={
+                "prompt": prompt,
+            }
+        )
+        video_url = str(output) if output else None
+        print(f"[Animation] Video URL: {video_url}")
+    except Exception as e:
+        return jsonify({"error": f"Replicate API error: {str(e)}"}), 500
+
+    if not video_url:
+        return jsonify({"error": "No video generated"}), 500
+
+    return jsonify({"word": word, "description": description, "video_url": video_url})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALAsKA – Animations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: Georgia, 'Times New Roman', serif;
+          background: #fff;
+          color: #111;
+          min-height: 100vh;
+          -webkit-font-smoothing: antialiased;
+        }
+
+        .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+
+        header { margin-bottom: 40px; }
+        h1 { font-size: 24px; font-weight: normal; margin-bottom: 16px; }
+
+        nav { margin-bottom: 48px; }
+        nav a {
+          font-size: 14px;
+          color: #111;
+          text-decoration: none;
+          margin-right: 20px;
+          padding-bottom: 2px;
+        }
+        nav a:hover { border-bottom: 1px solid #111; }
+        nav a.active { border-bottom: 1px solid #111; }
+
+        h2 { font-size: 14px; font-weight: normal; color: #666; margin-bottom: 12px; }
+
+        .input-row { display: flex; gap: 8px; }
+
+        .word-input {
+          flex: 1;
+          border: 1px solid #ddd;
+          padding: 8px 12px;
+          font: inherit;
+          font-size: 15px;
+          color: #111;
+          background: #fff;
+          outline: none;
+        }
+        .word-input:focus { border-color: #111; }
+
+        button {
+          border: 1px solid #111;
+          cursor: pointer;
+          font: inherit;
+          font-size: 13px;
+          padding: 7px 16px;
+          background: #fff;
+          color: #111;
+          margin-right: 6px;
+        }
+        button:hover { background: #111; color: #fff; }
+        button:disabled { border-color: #ddd; color: #ccc; cursor: default; background: #fff; }
+
+        .examples { margin-top: 12px; font-size: 13px; color: #666; }
+        .examples span { margin-right: 8px; }
+        .chip {
+          border: 1px solid #ddd;
+          background: #fff;
+          color: #111;
+          padding: 4px 10px;
+          font-size: 13px;
+          cursor: pointer;
+          margin-right: 4px;
+        }
+        .chip:hover { border-color: #111; }
+
+        .loading {
+          display: none;
+          padding: 24px 0;
+          text-align: center;
+          color: #666;
+          font-size: 14px;
+          font-style: italic;
+        }
+
+        .spinner {
+          display: inline-block;
+          width: 18px;
+          height: 18px;
+          border: 2px solid #ddd;
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          vertical-align: middle;
+          margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .player { display: none; margin-top: 48px; }
+
+        .player-label {
+          font-size: 11px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 8px;
+        }
+
+        .video-container {
+          width: 100%;
+          border: 1px solid #ddd;
+          background: #fafafa;
+        }
+
+        .video-container video {
+          width: 100%;
+          display: block;
+        }
+
+        .video-description {
+          margin-top: 12px;
+          font-size: 14px;
+          color: #444;
+          padding: 8px 0;
+          border-bottom: 1px solid #eee;
+        }
+
+        .player-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 16px;
+        }
+
+        .speed-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 12px;
+          font-size: 13px;
+          color: #666;
+        }
+
+        .speed-slider {
+          flex: 1;
+          max-width: 200px;
+          accent-color: #111;
+        }
+
+        .error-box {
+          display: none;
+          color: #111;
+          font-size: 13px;
+          margin-top: 12px;
+          padding: 8px 0;
+          border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 600px) {
+          .page { padding: 32px 16px 60px; }
+          h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <h1>ALAsKA Sign Language</h1>
+    </header>
+
+    <nav>
+        <a href="/">Translator</a>
+        <a href="/quiz">Quiz</a>
+        <a href="/recognize">Recognizer</a>
+        <a href="/video">Video</a>
+        <a href="/animations" class="active">Animations</a>
+    </nav>
+
+    <section>
+        <h2>Enter a word to see its ASL sign animation</h2>
+
+        <div class="input-row">
+            <input type="text" class="word-input" id="wordInput" placeholder="e.g. HELLO" autocomplete="off" />
+            <button id="generateBtn">Generate</button>
+        </div>
+
+        <div class="examples">
+            <span>Try:</span>
+            <button class="chip" data-word="HELLO">Hello</button>
+            <button class="chip" data-word="THANK YOU">Thank you</button>
+            <button class="chip" data-word="SORRY">Sorry</button>
+            <button class="chip" data-word="PLEASE">Please</button>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+    </section>
+
+    <div class="loading" id="loading">
+        <span class="spinner"></span><span id="loadingText">Generating video...</span>
+    </div>
+
+    <section class="player" id="player">
+        <div class="player-label">ASL Sign: <strong id="wordLabel"></strong></div>
+
+        <div class="video-container">
+            <video id="signVideo" controls loop playsinline></video>
+        </div>
+
+        <div class="video-description" id="videoDescription"></div>
+
+        <div class="player-controls">
+            <button id="replayBtn">Replay</button>
+            <button id="slowBtn">Slow (0.5x)</button>
+            <button id="normalBtn" disabled>Normal (1x)</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    var wordInput = document.getElementById('wordInput');
+    var generateBtn = document.getElementById('generateBtn');
+    var errorBox = document.getElementById('errorBox');
+    var loading = document.getElementById('loading');
+    var loadingText = document.getElementById('loadingText');
+    var player = document.getElementById('player');
+    var wordLabel = document.getElementById('wordLabel');
+    var signVideo = document.getElementById('signVideo');
+    var videoDescription = document.getElementById('videoDescription');
+    var replayBtn = document.getElementById('replayBtn');
+    var slowBtn = document.getElementById('slowBtn');
+    var normalBtn = document.getElementById('normalBtn');
+    var chips = document.querySelectorAll('.chip');
+
+    chips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            wordInput.value = chip.dataset.word;
+        });
+    });
+
+    wordInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') generateBtn.click();
+    });
+
+    generateBtn.addEventListener('click', async function() {
+        var word = wordInput.value.trim();
+        if (!word) return;
+
+        errorBox.style.display = 'none';
+        player.style.display = 'none';
+        loading.style.display = 'block';
+        loadingText.textContent = 'Generating video (this may take up to a minute)...';
+        generateBtn.disabled = true;
+
+        try {
+            var res = await fetch('/generate-animation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word: word })
+            });
+            var data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            if (!data.video_url) throw new Error('No video generated.');
+
+            loading.style.display = 'none';
+            wordLabel.textContent = data.word;
+            videoDescription.textContent = data.description;
+            signVideo.src = data.video_url;
+            signVideo.playbackRate = 1;
+            signVideo.play();
+            player.style.display = 'block';
+            slowBtn.disabled = false;
+            normalBtn.disabled = true;
+        } catch (err) {
+            loading.style.display = 'none';
+            errorBox.textContent = err.message || 'Something went wrong.';
+            errorBox.style.display = 'block';
+        }
+        generateBtn.disabled = false;
+    });
+
+    replayBtn.addEventListener('click', function() {
+        signVideo.currentTime = 0;
+        signVideo.play();
+    });
+
+    slowBtn.addEventListener('click', function() {
+        signVideo.playbackRate = 0.5;
+        slowBtn.disabled = true;
+        normalBtn.disabled = false;
+    });
+
+    normalBtn.addEventListener('click', function() {
+        signVideo.playbackRate = 1;
+        normalBtn.disabled = true;
+        slowBtn.disabled = false;
+    });
+</script>
+</body>
+</html>

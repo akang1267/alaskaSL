@@ -3,8 +3,7 @@ title: ALAsKA Sign Language
 emoji: 🤟
 colorFrom: gray
 colorTo: gray
-sdk: python
-sdk_version: "3.11"
+sdk: docker
 app_file: app.py
 pinned: false
 ---
